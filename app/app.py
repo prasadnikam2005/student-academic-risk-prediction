@@ -1,17 +1,30 @@
 import streamlit as st
 import pandas as pd
 import joblib
-st.title("Academic Risk Prediction system ")
+from pathlib import Path
 
+# -------------------------------
+# App Title
+# -------------------------------
+st.title("🎓 Academic Risk Prediction System")
+
+# -------------------------------
+# Load Model (Cloud-safe)
+# -------------------------------
 @st.cache_resource
 def load_model():
-    model= joblib.load("../models/academic_risk_model.pkl")
-    return model
+    base_dir = Path(__file__).resolve().parent.parent
+    model_path = base_dir / "models" / "academic_risk_model.pkl"
+    return joblib.load(model_path)
 
-model=load_model()
+model = load_model()
 
+# -------------------------------
+# User Inputs
+# -------------------------------
 st.header("📋 Student Academic Details")
-col1,col2,col3=st.columns(3)
+
+col1, col2, col3 = st.columns(3)
 
 with col1:
     studytime = st.slider("📚 Weekly Study Time (1–4)", 1, 4, 2)
@@ -24,8 +37,9 @@ with col3:
 
 st.divider()
 
-
-
+# -------------------------------
+# Input Data (Model-Compatible)
+# -------------------------------
 input_data = {
     "school": "GP",
     "sex": "F",
@@ -59,40 +73,36 @@ input_data = {
     "absences": absences
 }
 
-input_df=pd.DataFrame([input_data])
-probs = model.predict_proba(input_df)[0]
-risk_classes = model.classes_
+input_df = pd.DataFrame([input_data])
 
-confidence = dict(zip(risk_classes, probs))
-
-
-
-def generate_explanation (studytime, failures, absences):
-    reasons=[]
+# -------------------------------
+# Explanation Logic (Aligned)
+# -------------------------------
+def generate_explanation(studytime, failures, absences, prediction):
+    reasons = []
 
     if failures >= 2:
-        reasons.append(" Multiple past academic failures")
-
+        reasons.append("multiple past academic failures")
     if absences >= 10:
-        reasons.append(" High number of absences")
-
+        reasons.append("high number of absences")
     if studytime <= 2:
-        reasons.append(" Low weekly study time")
+        reasons.append("low weekly study time")
 
-    if not reasons:
-        if not reasons:
-            if prediction == "High":
-                return (
-                    "The student is predicted as high risk due to a combination of "
-                    "academic, demographic, and support-related factors learned by the model."
-                )
-            else:
-                return "The student shows stable academic behavior with no major risk indicators."
+    if reasons:
+        return "Prediction influenced by: " + ", ".join(reasons) + "."
+    else:
+        return (
+            f"The student is predicted as **{prediction} risk** based on "
+            "overall academic, behavioral, and demographic patterns learned "
+            "from historical data."
+        )
 
-    return "Prediction is influenced by :"+ ",".join(reasons)+"."
-
+# -------------------------------
+# Prediction
+# -------------------------------
 if st.button("🔍 Predict Academic Risk"):
     prediction = model.predict(input_df)[0]
+    probabilities = model.predict_proba(input_df)[0]
 
     st.subheader("🎯 Prediction Result")
 
@@ -103,30 +113,27 @@ if st.button("🔍 Predict Academic Risk"):
     else:
         st.success("✅ Low Academic Risk")
 
-    explanation = generate_explanation(
-        studytime, failures, absences
-    )
-
-    st.subheader("📊 Prediction Confidence")
-
+    # Confidence table
     confidence_df = pd.DataFrame({
-        "Risk Level": list(confidence.keys()),
-        "Probability (%)": [round(v * 100, 2) for v in confidence.values()]
+        "Risk Level": model.classes_,
+        "Probability (%)": [round(p * 100, 2) for p in probabilities]
     })
 
+    st.subheader("📊 Prediction Confidence")
     st.table(confidence_df)
     st.bar_chart(confidence_df.set_index("Risk Level"))
 
+    # Explanation
     st.subheader("🧠 Explanation")
+    explanation = generate_explanation(studytime, failures, absences, prediction)
     st.info(explanation)
 
-
+# -------------------------------
+# Footer
+# -------------------------------
 st.divider()
 st.caption(
-"⚠️ This system is a decision-support tool. "
+    "⚠️ This system is a decision-support tool. "
     "Predictions are based on historical academic patterns "
     "and should be used alongside human judgement."
 )
-
-
-
