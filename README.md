@@ -1,172 +1,195 @@
-# 🎓 Student Academic Risk Prediction System (Explainable ML)
+# 🎓 Student Academic Risk Prediction System  
+### Explainable • Cost-Sensitive • Deployment-Ready ML
 
-An end-to-end, explainable Machine Learning system that predicts **academic risk levels** of students using historical academic and behavioral data.  
-The system is designed as a **decision-support tool** for early academic intervention and counseling.
+> An end-to-end Machine Learning system that predicts **academic risk levels** using socio-academic and behavioral data — built with cross-validation rigor, cost-sensitive learning, and explainable outputs.
 
-🔗 **Live App**:  
+🔗 **Live App:**  
 https://student-academic-risk-prediction-iheuopuzngcocm77g5bx4j.streamlit.app/
 
 ---
 
-## 🚀 Project Motivation
+## 🚀 Why This Project Matters
 
-Many students underperform or drop out due to unnoticed academic and behavioral patterns.  
-Early identification of **high-risk students** allows institutions and counselors to intervene proactively.
+Many students struggle due to hidden academic and behavioral patterns.  
+Most institutions react **after failure occurs**.
 
-This project focuses on:
-- Early risk prediction
-- Explainable ML (not black-box)
-- Real-world deployment
+This system enables:
 
----
+- Early identification of high-risk students  
+- Data-driven intervention decisions  
+- Transparent, explainable predictions  
+- Deployment-ready decision support  
 
-## 🎯 Problem Statement
-
-Given a student's academic, behavioral, and socio-demographic data,  
-**predict the student's academic risk level** as:
-
-- 🟢 Low Risk  
-- 🟠 Medium Risk  
-- 🔴 High Risk  
-
-and **explain why** the student is predicted to be at risk.
+The focus is not just accuracy — but **minimizing missed high-risk students**.
 
 ---
 
-## 📊 Dataset
+# 🎯 Problem Statement
 
-- **Source**: UCI Machine Learning Repository – Student Performance Dataset
-- **Type**: Real-world educational data
-- **Records**: 395 students
-- **Features**:
-  - Academic: study time, failures, absences, grades
-  - Behavioral: alcohol consumption, free time, outings
-  - Family & Socio-economic: parental education, family support, internet access
+Given socio-academic student data, classify students into:
 
-> The dataset is widely used in academic research and is interview-safe.
+- 🟢 **Low Risk**
+- 🟠 **Medium Risk**
+- 🔴 **High Risk**
 
----
+### 🔴 Primary Objective:
+Maximize **High-Risk Recall** to reduce false negatives.
 
-## 🧠 Machine Learning Approach
-
-### 🔹 Target Variable
-Final academic performance was converted into **risk categories**:
-- High Risk
-- Medium Risk
-- Low Risk
-
-### 🔹 Models Implemented
-| Model | Purpose |
-|------|--------|
-| Logistic Regression | Baseline model |
-| Decision Tree | **Primary model (explainable)** |
-| KNN | Comparison model |
-
-### 🔹 Why Decision Tree?
-- Handles non-linear relationships
-- Interpretable feature importance
-- Easy to explain in interviews
-- Suitable for decision-support systems
+In real-world intervention systems, **missing a high-risk student is costlier than raising a false alarm.**
 
 ---
 
-## 📈 Model Evaluation
+# 📊 Dataset Overview
 
-Evaluation metrics used:
-- Accuracy
-- Precision
-- Recall
-- F1-score
-- Confusion Matrix
+**Source:** UCI Machine Learning Repository – Student Performance Dataset  
+**Total Records:** 395 students  
 
-📌 Emphasis was placed on **recall for high-risk students**, as missing a high-risk student is costlier than a false alarm.
+## 🎯 Target Engineering
 
----
+- Risk categories derived from final grade (G3)
+- Data leakage removed: `G1`, `G2`, `G3` excluded before modeling
+- Multi-class classification setup
 
-## 🔍 Explainability (Key Differentiator)
+## 📌 Feature Categories
 
-The system provides:
-- Feature importance from Decision Tree
-- Rule-based explanations (failures, absences, study time)
-- Prediction confidence (class probabilities)
+### Academic
+- Study time
+- Past failures
+- Absences
 
-Example:
-> “Student predicted as high risk due to multiple past failures and high number of absences.”
+### Behavioral
+- Alcohol consumption
+- Going out frequency
+- Free time
 
----
-
-## 🖥️ Deployment
-
-- **Framework**: Streamlit
-- **Hosting**: Streamlit Cloud (Free)
-- **Deployment Type**: Interactive decision-support web app
-
-### App Capabilities:
-- User input via sliders
-- Risk prediction
-- Confidence visualization
-- Human-readable explanations
-
-🔗 **Live App**:  
-https://student-academic-risk-prediction-iheuopuzngcocm77g5bx4j.streamlit.app/
+### Socio-economic
+- Parent education
+- School support
+- Internet access
 
 ---
 
-## 🗂️ Project Structure
-student-academic-risk-prediction/
-├── app/
-│ └── app.py
-├── models/
-│ └── academic_risk_model.pkl
-├── notebooks/
-│ ├── 01_problem_understanding.ipynb
-│ ├── 02_eda.ipynb
-│ ├── 03_baseline_model.ipynb
-│ ├── 04_decision_tree.ipynb
-│ └── 05_knn_comparison.ipynb
-├── requirements.txt
-└── README.md
+# 🧠 Modeling Approach
+
+## 🔹 Evaluation Strategy
+
+- Stratified 5-Fold Cross-Validation  
+- Results reported as Mean ± Standard Deviation  
+- Class imbalance handled using balanced learning  
+
+### 📈 Metrics Evaluated
+
+- Accuracy  
+- Macro F1  
+- Balanced Accuracy  
+- 🔴 High-Risk Recall (Primary Metric)
+
+---
+
+## 🔹 Model Comparison
+
+| Model | High-Risk Recall | Macro F1 | Accuracy |
+|-------|------------------|----------|----------|
+| Decision Tree (controlled depth) | 0.40 | 0.38 | 0.47 |
+| Random Forest (class-balanced) | 0.38 | 0.42 | 0.53 |
+
+---
+
+# ⚖️ Cost-Sensitive Decision Strategy
+
+Default argmax prediction was replaced with a **threshold-based policy**.
+
+### 📌 Decision Rule
+
+Predict **High Risk** if:
+P(High Risk) ≥ 0.35
+
+
+This increases sensitivity toward high-risk students.
+
+## 📊 After Threshold Calibration
+
+| Metric | Value |
+|--------|-------|
+| 🔴 High-Risk Recall | **0.50** |
+| Accuracy | 0.53 |
+| Macro F1 | 0.44 |
+
+This improves intervention sensitivity while maintaining model stability.
+
+---
+
+# 🔍 Explainability Layer
+
+Designed for transparency and institutional usability.
+
+Includes:
+
+- Feature importance analysis  
+- Rule-based explanation logic  
+- Human-readable output summaries  
+- Probability confidence visualization in Streamlit  
+
+### 🔎 Top Risk Drivers
+
+- Past academic failures  
+- Absences  
+- Low study time  
+- High social activity patterns  
+
+### 🧾 Example Output
+
+> “Student predicted as High Risk due to multiple past failures and low weekly study time.”
+
+---
+
+# 🖥️ Deployment Architecture
+
+- End-to-end sklearn Pipeline (preprocessing + classifier)
+- Model serialized using `joblib`
+- Deployed via Streamlit Cloud
+- Threshold-based decision logic integrated inside app
+
+## 🌐 App Features
+
+- Interactive input sliders  
+- Real-time risk prediction  
+- Class probability visualization  
+- Automated explanation generation  
+
+---
+
+# 🗂️ Project Structure
+student-academic-risk-prediction/ ├── app/ │ └── app.py ├── models/ │ └── academic_risk_model.pkl ├── notebooks/ │ ├── 01_problem_understanding.ipynb │ ├── 02_eda.ipynb │ ├── 03_baseline_model.ipynb │ ├── 04_decision_tree.ipynb │ └── 05_knn_comparison.ipynb ├── requirements.txt └── README.md
 
 
 ---
 
-## 🛠️ Tech Stack
+# ⚠️ Limitations
 
-- Python
-- Pandas, NumPy
-- Scikit-learn
-- Matplotlib, Seaborn
-- Streamlit
-- GitHub
+- Small dataset (395 samples)
+- Target derived from final grade (proxy outcome)
+- No temporal progression modeling
+- No external validation dataset
 
 ---
 
-## ⚠️ Ethical Considerations
+# 🔮 Future Enhancements
 
-- Predictions should **not be used for punishment**
-- The system is a **decision-support tool**, not a final authority
-- Human judgment is essential
-- Risk of bias due to limited dataset size is acknowledged
-
----
-
-## 🔮 Future Improvements
-
-- Larger, multi-institution dataset
-- Time-series performance tracking
-- College-level dashboards
-- SHAP-based explainability
-- Integration with counseling platforms
+- Larger multi-institution dataset  
+- Time-series modeling of academic progression  
+- Probability calibration (Platt Scaling / Isotonic Regression)  
+- SHAP-based explainability  
+- Institutional analytics dashboard  
 
 ---
 
-## 👤 Author
+# 👨‍💻 Author
 
 **Prasad**  
 AIML Engineering Student  
-Interested in Explainable AI, Applied ML, and Real-world Decision Systems
+Focused on Applied Machine Learning & Explainable AI  
 
 ---
 
-## ⭐ If you find this project useful
-Give it a ⭐ on GitHub and feel free to explore or extend it!
+⭐ If you found this project valuable, consider starring the repository.
